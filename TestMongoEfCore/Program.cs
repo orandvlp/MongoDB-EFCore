@@ -46,7 +46,6 @@ async Task<ObjectId> CreateOrderAsync(DbContextOptions<MyDbContext> contextOptio
 async Task AddOrderLineToOrderAsync(ObjectId objectId, DbContextOptions<MyDbContext> contextOptions)
 {
     await using var dbContext = new MyDbContext(contextOptions);
-    dbContext.ChangeTracker.DetectChanges(); // <<<<<<<<<<< Doesn't work despite this line
 
     // Load the order from the database and add a new order line
     var orderDbModel = await dbContext.Orders
@@ -64,7 +63,8 @@ async Task AddOrderLineToOrderAsync(ObjectId objectId, DbContextOptions<MyDbCont
 
     // Map the order entity back to a db model to save it
     var updatedDbModel = orderEntity.ToDbModel();
-    dbContext.Attach(updatedDbModel); // <<<<<<<<<<< Doesn't work despite this line
+    dbContext.Attach(updatedDbModel);
+    dbContext.Entry(updatedDbModel).State = EntityState.Modified;
 
     var changed = await dbContext.SaveChangesAsync();
     Console.WriteLine($"Changed: {changed}");
